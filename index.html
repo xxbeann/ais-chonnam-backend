@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메뉴 CRUD</title>
+    <script>
+        // 전체 메뉴 받아오기 -------------------------------------------------------------------------------------------------------------
+        function getMenus(){
+            let body = document.getElementById('menu_list')
+            body.innerHTML = ''
+            // console.log(body)
+            fetch('http://127.0.0.1:8000/menus/') // 주소 불러오기
+            .then(result=>result.json()) // 불러와서 어떻게 할건대?
+            //fetch를 해오면 result를 받아와서 json으로 변환.
+            //이후 json형식에서 data로 반환 데이터 파싱
+            .then(data=>{
+                for(let i = 0; i<data.length;i++){
+                    body.innerHTML += data[i].img
+                }
+            })                     
+        }
+
+        // 선택 메뉴 표시 ----------------------------------------------------------------------------------------------------------------
+        function getMenu(){
+            // console.log("confirm")
+
+            const text = document.getElementsByTagName('input')[0].value
+            let body = document.getElementsByTagName('body')[0]
+            // console.log(text)
+            // const는 안바뀌는 값, let은 바뀌는 값.
+            fetch('http://127.0.0.1:8000/menu/' + text) // 주소 불러오기
+            .then(result=>result.json()) // 불러와서 어떻게 할건대?
+            .then(data=>{
+                // console.log(data)
+                let body = document.getElementById('menu_list')
+                body.innerHTML = data.img
+                // body.innerHTML += data.img
+            })                        
+        }
+
+        // 메뉴 등록 -------------------------------------------------------------------------------------------------------------------
+        // get방식과 post방식의 차이.
+        // get은 sql에서 select역할. post는 보이면 안되는 정보일 경우.
+        // post와 get은 담을 수 있는 정보의 양이 다르다.
+        // get은 어느정도 제한이 있다. 많은 양의 정보를 넣어야 할 경우 post
+        // post로만 쓰면 돈이 많이 과금된다. 서버에 저장해야하는 양이 늘어나기 때문.
+        function reg(){
+            const food = document.getElementById('food_reg').value;
+            const img = document.getElementById('img_reg').value;
+            fetch('http://127.0.0.1:8000/menu/', {
+                method:'POST', 
+                headers:{'Content-Type': 'application/json'}, // type지정
+                body:JSON.stringify({ food, img})}) // body형식으로 백엔드로 넘겨주는데 백에서 스트링형식으로 받으면 형식이 안맞는다.
+                // body에는 메소드 헤더 등 모든 정보가 포함되어있다.
+            .then(result => result.json())
+            .then(data =>{
+                menu_all()
+            })
+        }
+
+        // 메뉴 수정 -------------------------------------------------------------------------------------------------------------------
+        function edit(){
+            const food = document.getElementById('food_edit').value;
+            const img = document.getElementById('img_edit').value;
+            fetch('http://127.0.0.1:8000/menu/', {
+                method:'PUT', // POST써도 똑같이 동작되지만 이렇게 쓰자 하고 약속. REST
+                headers:{'Content-Type': 'application/json'}, // JSON으로 보내야하기때문에 바디로 감싸지만.
+                body:JSON.stringify({ food, img})})
+            .then(result => result.json())
+            .then(data =>{
+                console.log(data)
+                menu_all()
+                })
+        }
+
+        // 메뉴 삭제 -------------------------------------------------------------------------------------------------------------
+        function del(){
+            const food = document.getElementById('food_del').value;
+            fetch(`http://127.0.0.1:8000/menu/${food}`, {
+                method:'DELETE'}) // DELETE 메서드, Get과 비슷한 방식이기때문에 헤드를 지정할 필요가 없다.
+            .then(result => result.json())
+            .then(data =>{
+                console.log(data)
+                menu_all()
+                })
+        }
+
+
+    </script>
+</head>
+<body>
+    <div id="menu_list"></div>
+    <input type="text">
+    <button onclick="getMenu()">click</button>
+
+    <br>
+    <input type="text" id="food_reg">
+    <input type="text" id="img_reg">
+    <button onclick="reg()">Reg</button>
+
+    <div>
+        <input type="text" id="food_edit">
+        <input type="text" id="img_edit">
+        <button onclick="edit();">수정</button>
+    </div>
+
+    <div>
+        <input type="text" id="food_del">
+        <button onclick="del();">삭제</button>
+    </div>
+
+    <button onclick="getMenus()">All click</button>
+</body>
+</html>
